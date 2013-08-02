@@ -1,0 +1,7 @@
+{
+    "name": "inlineswipe",
+    "version": "0.0.1",
+    "dependencies": {
+        "fh-nodeapp": "*"
+    }
+}
