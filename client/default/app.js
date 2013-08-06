@@ -37,32 +37,58 @@ playList = new SwipeView('#wrapper', {
 	hastyPageFlip: true
 });
 
-$(window).load(function(e) {
-	console.log("loaded");
+$(document).ready(function() {
+	console.log("Document loaded");
+	loadData();
+	console.log("Window loaded");
+	setTimeout(function() {
+		var id = $('.swipeview-active').attr('data-page-index');
+		var item = videos[id];
+		item.current = true;
+
+		if (item.current === true) {
+			videoPlayer(item);
+		}
+	}, 10);
+});
+
+$(window).load(function() {
+
+
 });
 
 
 
 /*   <<<<<<<<<<<<   METHODS   >>>>>>>>>>>>   */
 
+
 // Load initial data
 
-for (i = 0; i < 3; i++) {
-	page = i == 0 ? videos.length - 1 : i - 1;
-	el = document.createElement('img');
-	el.className = 'loading';
-	el.id = page;
-	el.src = videos[page].thumb;
-	el.width = videos[page].width;
-	el.height = videos[page].height;
-	el.onload = function() {
-		this.className = '';
-		updateDescription();
-		console.log(videos);
+function loadData() {
+	for (i = 0; i < 3; i++) {
+		var item = $('div[data-page-index="' + i + '"]');
+		if (!item.hasClass('swipeview-active')) {
+			page = i;
+			console.log(page, item);
+			el = document.createElement('img');
+			el.className = 'loading';
+			el.id = page;
+			el.src = videos[page].thumb;
+			el.width = videos[page].width;
+			el.height = videos[page].height;
+			el.onload = function() {
+				this.className = '';
+				// updateDescription();
+			}
+			// playList.masterPages[i].appendChild(el);
+			item.html(el);
+		} else {
+			console.log('ACTIVE', item);
+		}
 	}
-	playList.masterPages[i].appendChild(el);
 }
 
+// handler
 playList.onFlip(function() {
 	var el,
 		upcoming,
@@ -72,6 +98,7 @@ playList.onFlip(function() {
 		upcoming = playList.masterPages[i].dataset.upcomingPageIndex;
 
 		if (upcoming != playList.masterPages[i].dataset.pageIndex) {
+			loadThumb();
 			el = playList.masterPages[i].querySelector('img');
 			el.className = 'loading';
 			el.id = upcoming;
@@ -86,22 +113,41 @@ playList.onFlip(function() {
 	dots[playList.pageIndex + 1].className = 'selected';
 });
 
+
+// load iframe if current equals 
+
 function videoPlayer(item) {
+
 	var id = $('.swipeview-active').attr('data-page-index');
 	$('.swipeview-active > img').remove();
-	var item = videos[id];
-
-	console.log(item.url);
+	// console.log(item.url);
 	el = document.createElement('iframe');
 	el.className = '';
 	el.src = item.url;
 	el.width = item.width;
 	el.height = item.height;
-	el.onload = function() {
+	el.onload = function(e) {
 		className = '';
-	}
-	console.log(el);
-	playList.masterPages[id].appendChild(el);
+		updateDescription();
+	};
+	$('.swipeview-active[data-page-index="' + id + '"]').html(el);
+}
+
+// Remove iframe and replace with thumb.
+
+function removeIframe(videos) {
+	var iframe = $('div:not(.swipeview-active) > div > iframe');
+	var parent = $(iframe).parent();
+	var index = parent.attr('data-page-index');
+	iframe.remove();
+	console.log('removed iframe' + " id : " + index);
+
+	el = document.createElement('img');
+	el.src = videos[index].thumb;
+	el.width = videos[index].width;
+	el.height = videos[index].height;
+	parent.html(el);
+	// playList.masterPages[index].appendChild(el);
 }
 
 function updateDescription() {
@@ -109,6 +155,8 @@ function updateDescription() {
 	var item = videos[id];
 	$('#description').html(item.details);
 }
+
+// Handle adding active class to current div.
 
 playList.onMoveOut(function(e) {
 	console.log("onMoveOut");
@@ -123,23 +171,20 @@ playList.onMoveIn(function(e) {
 	/(^|\s)swipeview-active(\s|$)/.test(className) || (playList.masterPages[playList.currentMasterPage].className = !className ? 'swipeview-active' : className + 'swipeview-active');
 });
 
+
+/*   <<<<<<<<<<<<   EVENT LISTENERS   >>>>>>>>>>>>   */
 document.addEventListener('touchstart', function(e) {
-	console.log('touchstart');
-	// var id = $('.swipeview-active').attr('data-page-index');
-	// var item = videos[id];
-	// if (active && item.current === false) {
-	// 	item.current = true;
-	// 	console.log(item.desc + " " + item.current);
-	// }
+	console.log("Not Active");
 }, false);
 
 document.addEventListener('touchmove', function(e) {
 	e.preventDefault();
-	console.log('touchmove');
+	// removeIframe(videos);
 }, false);
 
+// Animation end load iframe.
 document.addEventListener('webkitTransitionEnd', function(e) {
-	console.log('Animation end');
+	removeIframe(videos);
 	var id = $('.swipeview-active').attr('data-page-index');
 	var item = videos[id];
 	item.current = true;
@@ -149,4 +194,5 @@ document.addEventListener('webkitTransitionEnd', function(e) {
 	if (item.current === true) {
 		videoPlayer(item);
 	}
+
 }, false);
