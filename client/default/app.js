@@ -26,10 +26,10 @@ var videos = [{
 
 var el,
 	playList,
+	i,
 	dots = document.querySelectorAll('#nav li'),
 	active = $('.swipeview-active'),
 	id = active.attr('data-page-index'),
-	page,
 	item = videos[id];
 
 playList = new SwipeView('#wrapper', {
@@ -37,10 +37,12 @@ playList = new SwipeView('#wrapper', {
 	hastyPageFlip: true
 });
 
+// Load library data and handle current video
+
 $(document).ready(function() {
 	console.log("Document loaded");
 	loadData();
-	console.log("Window loaded");
+
 	setTimeout(function() {
 		var id = $('.swipeview-active').attr('data-page-index');
 		var item = videos[id];
@@ -52,35 +54,25 @@ $(document).ready(function() {
 	}, 10);
 });
 
-$(window).load(function() {
-
-
-});
-
-
-
 /*   <<<<<<<<<<<<   METHODS   >>>>>>>>>>>>   */
 
 
 // Load initial data
 
 function loadData() {
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < videos.length; i++) {
 		var item = $('div[data-page-index="' + i + '"]');
 		if (!item.hasClass('swipeview-active')) {
-			page = i;
-			console.log(page, item);
+			console.log(i, item);
 			el = document.createElement('img');
 			el.className = 'loading';
-			el.id = page;
-			el.src = videos[page].thumb;
-			el.width = videos[page].width;
-			el.height = videos[page].height;
+			el.id = i;
+			el.src = videos[i].thumb;
+			el.width = videos[i].width;
+			el.height = videos[i].height;
 			el.onload = function() {
 				this.className = '';
-				// updateDescription();
-			}
-			// playList.masterPages[i].appendChild(el);
+			};
 			item.html(el);
 		} else {
 			console.log('ACTIVE', item);
@@ -88,13 +80,13 @@ function loadData() {
 	}
 }
 
-// handler
+// handler to load next view data
 playList.onFlip(function() {
 	var el,
 		upcoming,
 		i;
 
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < videos.length; i++) {
 		upcoming = playList.masterPages[i].dataset.upcomingPageIndex;
 
 		if (upcoming != playList.masterPages[i].dataset.pageIndex) {
@@ -114,13 +106,11 @@ playList.onFlip(function() {
 });
 
 
-// load iframe if current equals 
+// load iframe & object url if current equals. 
 
 function videoPlayer(item) {
-
 	var id = $('.swipeview-active').attr('data-page-index');
 	$('.swipeview-active > img').remove();
-	// console.log(item.url);
 	el = document.createElement('iframe');
 	el.className = '';
 	el.src = item.url;
@@ -147,42 +137,44 @@ function removeIframe(videos) {
 	el.width = videos[index].width;
 	el.height = videos[index].height;
 	parent.html(el);
-	// playList.masterPages[index].appendChild(el);
 }
+
+// function to update decription based on active screen
 
 function updateDescription() {
 	var id = $('.swipeview-active').attr('data-page-index');
 	var item = videos[id];
-	$('#description').html(item.details);
+	$('#videoDescription').html(item.details);
 }
 
-// Handle adding active class to current div.
+// remove .swipeview-active class from div 
 
-playList.onMoveOut(function(e) {
-	console.log("onMoveOut");
+playList.onMoveOut(function() {
 	playList.masterPages[playList.currentMasterPage].className =
 		playList.masterPages[playList.currentMasterPage].className.replace(/(^|\s)swipeview-active(\s|$)/, '');
 
 });
 
-playList.onMoveIn(function(e) {
-	console.log("onMoveIn");
+// add .swipeview-active class to viewport div
+
+playList.onMoveIn(function() {
 	var className = playList.masterPages[playList.currentMasterPage].className;
 	/(^|\s)swipeview-active(\s|$)/.test(className) || (playList.masterPages[playList.currentMasterPage].className = !className ? 'swipeview-active' : className + 'swipeview-active');
 });
 
 
 /*   <<<<<<<<<<<<   EVENT LISTENERS   >>>>>>>>>>>>   */
-document.addEventListener('touchstart', function(e) {
-	console.log("Not Active");
-}, false);
+
+
+
+// Standard event listener for SwipeView.js lib
 
 document.addEventListener('touchmove', function(e) {
 	e.preventDefault();
-	// removeIframe(videos);
 }, false);
 
 // Animation end load iframe.
+
 document.addEventListener('webkitTransitionEnd', function(e) {
 	removeIframe(videos);
 	var id = $('.swipeview-active').attr('data-page-index');
@@ -194,5 +186,4 @@ document.addEventListener('webkitTransitionEnd', function(e) {
 	if (item.current === true) {
 		videoPlayer(item);
 	}
-
 }, false);
