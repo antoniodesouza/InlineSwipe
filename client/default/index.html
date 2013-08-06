@@ -4,6 +4,23 @@
 <!--  -<<<<<<<<<<  SCRIPTS  >>>>>>>>>>-   -->
 <script src="lib/jquery.js"></script>
 <script src="lib/swipeview.js"></script>
+
 <!--  -<<<<<<<<<<  VIEWS  >>>>>>>>>>-   -->
+<div class="container">
+
+    <div id="wrapper"></div>
+
+    <ul id="nav">
+        <li id="prev" onclick="playList.prev()">-</li>
+        <li class="selected" onclick="playList.goToPage(0)"></li>
+        <li onclick="playList.goToPage(1)"></li>
+        <li onclick="playList.goToPage(2)"></li>
+        <li id="next" onclick="playList.next()">+</li>
+    </ul>  
+    
+    <div id="description"></div>
+
+</div>
 
 <!--  -<<<<<<<<<<  ENTRY POINT  >>>>>>>>>>-   -->
+<script src="app.js"></script>
